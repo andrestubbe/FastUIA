@@ -30,7 +30,6 @@ public class Demo {
 
 ## Table of Contents
 - [Key Features](#key-features)
-- [Performance](#performance)
 - [Installation](#installation)
 - [Try the Demo](#try-the-demo)
 - [API Reference](#api-reference)
@@ -50,17 +49,6 @@ public class Demo {
 ---
 
 ## Performance
-
-FastUIA is significantly faster than standard Java alternatives:
-
-| Operation | FastUIA | Standard Java | Speedup |
-|-----------|---------|---------------|---------|
-| Get Focused Element | 0.5 ms | 5 ms | **10x** |
-| Get Element Name | 0.3 ms | 3 ms | **10x** |
-
----
-
-## Installation
 
 FastJava modules require **two** dependencies: the module itself, and `FastCore` (which handles the cross-platform native library extraction).
 

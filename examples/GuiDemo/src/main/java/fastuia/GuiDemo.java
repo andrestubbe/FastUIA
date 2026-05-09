@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 public class GuiDemo extends JFrame {
     private FastUIA uia;
     private JTextArea outputArea;
+    private JTextField valueField;
     private long currentElement = 0;
 
     public GuiDemo() {
@@ -154,10 +155,13 @@ public class GuiDemo extends JFrame {
     }
 
     private JPanel createActionsPanel() {
-        JPanel panel = new JPanel(new GridLayout(2, 4, 5, 5));
+        JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(new TitledBorder("Actions"));
 
-        panel.add(new JButton(new AbstractAction("Invoke") {
+        // Button panel
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 4, 5, 5));
+
+        buttonPanel.add(new JButton(new AbstractAction("Invoke") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentElement == 0) {
@@ -169,7 +173,7 @@ public class GuiDemo extends JFrame {
             }
         }));
 
-        panel.add(new JButton(new AbstractAction("Expand") {
+        buttonPanel.add(new JButton(new AbstractAction("Expand") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentElement == 0) {
@@ -181,7 +185,7 @@ public class GuiDemo extends JFrame {
             }
         }));
 
-        panel.add(new JButton(new AbstractAction("Collapse") {
+        buttonPanel.add(new JButton(new AbstractAction("Collapse") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentElement == 0) {
@@ -193,7 +197,7 @@ public class GuiDemo extends JFrame {
             }
         }));
 
-        panel.add(new JButton(new AbstractAction("Scroll Top-Left") {
+        buttonPanel.add(new JButton(new AbstractAction("Scroll Top-Left") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentElement == 0) {
@@ -205,22 +209,37 @@ public class GuiDemo extends JFrame {
             }
         }));
 
-        panel.add(new JButton(new AbstractAction("Set Value") {
+        buttonPanel.add(new JButton(new AbstractAction("Get Value") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentElement == 0) {
                     log("Error: No element selected");
                     return;
                 }
-                String value = JOptionPane.showInputDialog(GuiDemo.this, "Enter value:");
-                if (value != null) {
+                String value = uia.GetValue(currentElement);
+                valueField.setText(value != null ? value : "");
+                log("Got value: " + value);
+            }
+        }));
+
+        buttonPanel.add(new JButton(new AbstractAction("Set Value") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (currentElement == 0) {
+                    log("Error: No element selected");
+                    return;
+                }
+                String value = valueField.getText();
+                if (value != null && !value.isEmpty()) {
                     uia.SetValue(currentElement, value);
                     log("Set value: " + value);
+                } else {
+                    log("Error: Please enter a value");
                 }
             }
         }));
 
-        panel.add(new JButton(new AbstractAction("Set Selection") {
+        buttonPanel.add(new JButton(new AbstractAction("Set Selection") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentElement == 0) {
@@ -232,7 +251,7 @@ public class GuiDemo extends JFrame {
             }
         }));
 
-        panel.add(new JButton(new AbstractAction("Scroll Center") {
+        buttonPanel.add(new JButton(new AbstractAction("Scroll Center") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentElement == 0) {
@@ -244,7 +263,7 @@ public class GuiDemo extends JFrame {
             }
         }));
 
-        panel.add(new JButton(new AbstractAction("Scroll Bottom-Right") {
+        buttonPanel.add(new JButton(new AbstractAction("Scroll Bottom-Right") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (currentElement == 0) {
@@ -255,6 +274,15 @@ public class GuiDemo extends JFrame {
                 log("Scrolled to bottom-right");
             }
         }));
+
+        panel.add(buttonPanel, BorderLayout.CENTER);
+
+        // Input panel
+        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPanel.add(new JLabel("Element Value:"));
+        valueField = new JTextField(30);
+        inputPanel.add(valueField);
+        panel.add(inputPanel, BorderLayout.SOUTH);
 
         return panel;
     }
