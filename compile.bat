@@ -71,7 +71,7 @@ cl.exe /O2 /W3 /MD /EHsc /LD ^
    /Fo:build\ ^
    /Fe:build\%LIB_NAME%.dll ^
    native\*.cpp ^
-   user32.lib gdi32.lib shcore.lib advapi32.lib dwmapi.lib uiautomationcore.lib ^
+   user32.lib gdi32.lib shcore.lib advapi32.lib dwmapi.lib uiautomationcore.lib ole32.lib oleaut32.lib ^
    /link /DLL /MACHINE:X64 /DEF:native\%LIB_NAME%.def
 
 if %ERRORLEVEL% == 0 (

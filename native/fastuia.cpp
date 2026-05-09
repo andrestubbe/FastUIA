@@ -203,11 +203,15 @@ JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetSelection(JNIEnv* env, j
     IUIAutomationTextPattern* pPattern = FastUIA::instance().getTextPattern((IUIAutomationElement*)handle);
     if (pPattern) {
         IUIAutomationTextRangeArray* pRanges = NULL;
-        if (SUCCEEDED(pPattern->get_SupportedTextSelection(&pRanges)) && pRanges) {
-            // Simplified: return a placeholder or implement range extraction
+        if (SUCCEEDED(pPattern->GetSelection(&pRanges)) && pRanges) {
+            int count = 0;
+            pRanges->get_Length(&count);
             pRanges->Release();
             pPattern->Release();
-            return env->NewStringUTF("Selection supported");
+            
+            char buffer[64];
+            sprintf_s(buffer, "Selection: %d ranges", count);
+            return env->NewStringUTF(buffer);
         }
         pPattern->Release();
     }
