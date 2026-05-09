@@ -87,6 +87,18 @@ FastJava modules require **two** dependencies: the module itself, and `FastCore`
 </dependencies>
 ```
 
+### Gradle (JitPack)
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.andrestubbe:fastuia:0.1.0'
+    implementation 'com.github.andrestubbe:fastcore:0.1.0'
+}
+```
+
 ---
 
 ## API Reference (FastUIAElement)
