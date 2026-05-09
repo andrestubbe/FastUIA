@@ -25,6 +25,13 @@ JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetFirstChild(JNIEnv* env, jobject 
 JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetNextSibling(JNIEnv* env, jobject obj, jlong elementHandle);
 JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetPreviousSibling(JNIEnv* env, jobject obj, jlong elementHandle);
 
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_IsValid(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsValue(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsInvoke(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsExpandCollapse(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsScroll(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsSelection(JNIEnv* env, jobject obj, jlong elementHandle);
+
 #ifdef __cplusplus
 }
 #endif

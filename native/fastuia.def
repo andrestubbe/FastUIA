@@ -19,3 +19,9 @@ EXPORTS
     Java_fastuia_FastUIA_GetFirstChild
     Java_fastuia_FastUIA_GetNextSibling
     Java_fastuia_FastUIA_GetPreviousSibling
+    Java_fastuia_FastUIA_IsValid
+    Java_fastuia_FastUIA_SupportsValue
+    Java_fastuia_FastUIA_SupportsInvoke
+    Java_fastuia_FastUIA_SupportsExpandCollapse
+    Java_fastuia_FastUIA_SupportsScroll
+    Java_fastuia_FastUIA_SupportsSelection

@@ -1,9 +1,7 @@
 package fastuia;
 
-import fastuia.FastUIA;
-
 /**
- * Basic Hello World Demo for FastUIA.
+ * FastUIA Demo — showcases the object-oriented API.
  */
 public class Demo {
     public static void main(String[] args) {
@@ -11,19 +9,32 @@ public class Demo {
         
         FastUIA uia = new FastUIA();
         
-        System.out.println("Getting focused element...");
-        long focusedElement = uia.GetFocusedElement();
+        // Use the typed wrapper API
+        FastUIAElement el = uia.getFocusedElement();
         
-        if (focusedElement != 0) {
-            String name = uia.GetName(focusedElement);
-            String controlType = uia.GetControlType(focusedElement);
+        if (el != null && el.isValid()) {
+            System.out.println("Focused: " + el);
+            System.out.println("Type:    " + el.getControlType());
+            System.out.println("Name:    " + el.getName());
+            System.out.println("Value:   " + el.getValue());
             
-            System.out.println("Focused element name: " + name);
-            System.out.println("Control type: " + controlType);
-            
-            int[] rect = uia.GetBoundingRect(focusedElement);
+            int[] rect = el.getBoundingRect();
             if (rect != null) {
-                System.out.println("Bounding rect: x=" + rect[0] + ", y=" + rect[1] + ", w=" + rect[2] + ", h=" + rect[3]);
+                System.out.printf("Rect:    x=%d, y=%d, w=%d, h=%d%n", rect[0], rect[1], rect[2], rect[3]);
+            }
+            
+            // Pattern support checks
+            System.out.println("Supports:");
+            System.out.println("  Value:   " + el.supportsValue());
+            System.out.println("  Invoke:  " + el.supportsInvoke());
+            System.out.println("  Expand:  " + el.supportsExpandCollapse());
+            System.out.println("  Scroll:  " + el.supportsScroll());
+            System.out.println("  Select:  " + el.supportsSelection());
+            
+            // Traverse
+            FastUIAElement parent = el.getParent();
+            if (parent != null) {
+                System.out.println("Parent:  " + parent.getName());
             }
         } else {
             System.out.println("No focused element found.");

@@ -20,11 +20,26 @@ public class FastUIA {
     public native long GetFocusedElement();
 
     /**
-     * Get the control type of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Control type as string
+     * Get the currently focused UI element as a typed wrapper.
      */
-    public native String GetControlType(long elementHandle);
+    public FastUIAElement getFocusedElement() {
+        long handle = GetFocusedElement();
+        return handle != 0 ? new FastUIAElement(handle, this) : null;
+    }
+
+    /**
+     * Get the control type of a UI element as raw UIA id.
+     * @param elementHandle Handle to the UI element
+     * @return Control type id
+     */
+    public native int GetControlType(long elementHandle);
+
+    /**
+     * Get the control type as typed enum.
+     */
+    public ControlType GetControlTypeAsEnum(long elementHandle) {
+        return ControlType.fromUiaId(GetControlType(elementHandle));
+    }
 
     /**
      * Get the bounding rectangle of a UI element.
@@ -121,5 +136,20 @@ public class FastUIA {
      * @return Handle to the previous sibling element
      */
     public native long GetPreviousSibling(long elementHandle);
+
+    // Validation
+
+    /**
+     * Check if a native element handle is still valid.
+     */
+    public native boolean IsValid(long elementHandle);
+
+    // Pattern support checks
+
+    public native boolean SupportsValue(long elementHandle);
+    public native boolean SupportsInvoke(long elementHandle);
+    public native boolean SupportsExpandCollapse(long elementHandle);
+    public native boolean SupportsScroll(long elementHandle);
+    public native boolean SupportsSelection(long elementHandle);
 
 }

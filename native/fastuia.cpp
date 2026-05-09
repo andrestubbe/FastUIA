@@ -49,17 +49,15 @@ JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetFocusedElement(JNIEnv* env, jobj
     return 0;
 }
 
-JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetControlType(JNIEnv* env, jobject obj, jlong elementHandle) {
+JNIEXPORT jint JNICALL Java_fastuia_FastUIA_GetControlType(JNIEnv* env, jobject obj, jlong elementHandle) {
     IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return NULL;
+    if (!pElement) return 0;
     
     CONTROLTYPEID controlType;
     if (SUCCEEDED(pElement->get_CurrentControlType(&controlType))) {
-        char buffer[32];
-        sprintf_s(buffer, "%d", controlType);
-        return env->NewStringUTF(buffer);
+        return (jint)controlType;
     }
-    return NULL;
+    return 0;
 }
 
 JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_GetBoundingRect(JNIEnv* env, jobject obj, jlong elementHandle) {
@@ -270,4 +268,73 @@ JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetPreviousSibling(JNIEnv* env, job
         pWalker->Release();
     }
     return 0;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_IsValid(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    BOOL isOffscreen = FALSE;
+    HRESULT hr = pElement->get_CurrentIsOffscreen(&isOffscreen);
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsValue(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationValuePattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ValuePatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsInvoke(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationInvokePattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_InvokePatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsExpandCollapse(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationExpandCollapsePattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ExpandCollapsePatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsScroll(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationScrollPattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ScrollPatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsSelection(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationSelectionPattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_SelectionPatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
 }
