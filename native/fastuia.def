@@ -1,0 +1,21 @@
+LIBRARY fastuia
+EXPORTS
+    ; JNI Method Exports
+    ; Format: Java_packagename_Classname_methodName
+    
+    Java_fastuia_FastUIA_GetFocusedElement
+    Java_fastuia_FastUIA_GetControlType
+    Java_fastuia_FastUIA_GetBoundingRect
+    Java_fastuia_FastUIA_GetName
+    Java_fastuia_FastUIA_GetValue
+    Java_fastuia_FastUIA_SetValue
+    Java_fastuia_FastUIA_GetSelection
+    Java_fastuia_FastUIA_SetSelection
+    Java_fastuia_FastUIA_Invoke
+    Java_fastuia_FastUIA_Expand
+    Java_fastuia_FastUIA_Collapse
+    Java_fastuia_FastUIA_Scroll
+    Java_fastuia_FastUIA_GetParent
+    Java_fastuia_FastUIA_GetFirstChild
+    Java_fastuia_FastUIA_GetNextSibling
+    Java_fastuia_FastUIA_GetPreviousSibling
