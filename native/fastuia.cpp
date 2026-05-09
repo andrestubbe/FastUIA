@@ -60,7 +60,7 @@ JNIEXPORT jint JNICALL Java_fastuia_FastUIA_GetControlType(JNIEnv* env, jobject 
     return 0;
 }
 
-JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_GetBoundingRect(JNIEnv* env, jobject obj, jlong elementHandle) {
+JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_GetBoundingRectRaw(JNIEnv* env, jobject obj, jlong elementHandle) {
     IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
     if (!pElement) return NULL;
     
@@ -337,4 +337,77 @@ JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsSelection(JNIEnv* env, j
         return JNI_TRUE;
     }
     return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsText(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationTextPattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_TextPatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsWindow(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationWindowPattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_WindowPatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsLegacyIAccessible(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationLegacyIAccessiblePattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_LegacyIAccessiblePatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsToggle(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationTogglePattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_TogglePatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsRangeValue(JNIEnv* env, jobject obj, jlong elementHandle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+    if (!pElement) return JNI_FALSE;
+    
+    IUIAutomationRangeValuePattern* pPattern = NULL;
+    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_RangeValuePatternId, (IUnknown**)&pPattern))) {
+        if (pPattern) pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+// Event Tracking (Stubs — full implementation requires IUIAutomationEventHandler)
+
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_StartFocusTracking(JNIEnv* env, jobject obj) {
+    // TODO: Register IUIAutomationFocusChangedEventHandler
+    // This requires implementing a COM event handler class
+    printf("[FastUIA] StartFocusTracking called (stub)\n");
+}
+
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_StopFocusTracking(JNIEnv* env, jobject obj) {
+    // TODO: Unregister focus event handler
+    printf("[FastUIA] StopFocusTracking called (stub)\n");
 }

@@ -9,8 +9,8 @@ extern "C" {
 
 // Export declarations (Matches fastuia.def)
 JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetFocusedElement(JNIEnv* env, jobject obj);
-JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetControlType(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_GetBoundingRect(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jint JNICALL Java_fastuia_FastUIA_GetControlType(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_GetBoundingRectRaw(JNIEnv* env, jobject obj, jlong elementHandle);
 JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetName(JNIEnv* env, jobject obj, jlong elementHandle);
 JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetValue(JNIEnv* env, jobject obj, jlong elementHandle);
 JNIEXPORT void JNICALL Java_fastuia_FastUIA_SetValue(JNIEnv* env, jobject obj, jlong elementHandle, jstring value);
@@ -31,6 +31,14 @@ JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsInvoke(JNIEnv* env, jobj
 JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsExpandCollapse(JNIEnv* env, jobject obj, jlong elementHandle);
 JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsScroll(JNIEnv* env, jobject obj, jlong elementHandle);
 JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsSelection(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsText(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsWindow(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsLegacyIAccessible(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsToggle(JNIEnv* env, jobject obj, jlong elementHandle);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsRangeValue(JNIEnv* env, jobject obj, jlong elementHandle);
+
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_StartFocusTracking(JNIEnv* env, jobject obj);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_StopFocusTracking(JNIEnv* env, jobject obj);
 
 #ifdef __cplusplus
 }

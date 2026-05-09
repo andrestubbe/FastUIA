@@ -2,22 +2,25 @@ package fastuia;
 
 import fastcore.FastCore;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 /**
  * FastUIA Main API Class.
  * Native Windows UI Automation capabilities exposed via JNI.
  */
-public class FastUIA {
+public final class FastUIA {
 
     // Load the native library once upon class initialization
     static {
         FastCore.loadLibrary("fastuia");
     }
 
-    /**
-     * Get the currently focused UI element.
-     * @return Handle to the focused element
-     */
-    public native long GetFocusedElement();
+    private final List<FocusChangedListener> focusListeners = new CopyOnWriteArrayList<>();
+    private final List<TextChangedListener> textListeners = new CopyOnWriteArrayList<>();
+    private final List<StructureChangedListener> structureListeners = new CopyOnWriteArrayList<>();
+
+    // --- Core ---
 
     /**
      * Get the currently focused UI element as a typed wrapper.
@@ -28,128 +31,117 @@ public class FastUIA {
     }
 
     /**
-     * Get the control type of a UI element as raw UIA id.
-     * @param elementHandle Handle to the UI element
-     * @return Control type id
+     * Wrap an existing native handle into a typed element.
      */
+    public FastUIAElement fromHandle(long handle) {
+        return handle != 0 ? new FastUIAElement(handle, this) : null;
+    }
+
+    // --- Events ---
+
+    public void addFocusChangedListener(FocusChangedListener l) {
+        focusListeners.add(l);
+    }
+
+    public void removeFocusChangedListener(FocusChangedListener l) {
+        focusListeners.remove(l);
+    }
+
+    public void addTextChangedListener(TextChangedListener l) {
+        textListeners.add(l);
+    }
+
+    public void removeTextChangedListener(TextChangedListener l) {
+        textListeners.remove(l);
+    }
+
+    public void addStructureChangedListener(StructureChangedListener l) {
+        structureListeners.add(l);
+    }
+
+    public void removeStructureChangedListener(StructureChangedListener l) {
+        structureListeners.remove(l);
+    }
+
+    // Internal callback from native event thread
+    void notifyFocusChanged(long handle) {
+        FastUIAElement el = fromHandle(handle);
+        if (el != null) {
+            for (FocusChangedListener l : focusListeners) {
+                l.onFocusChanged(el);
+            }
+        }
+    }
+
+    void notifyTextChanged(long handle, String newText) {
+        FastUIAElement el = fromHandle(handle);
+        if (el != null) {
+            for (TextChangedListener l : textListeners) {
+                l.onTextChanged(el, newText);
+            }
+        }
+    }
+
+    void notifyStructureChanged(long handle, int changeType) {
+        FastUIAElement el = fromHandle(handle);
+        if (el != null) {
+            for (StructureChangedListener l : structureListeners) {
+                l.onStructureChanged(el, changeType);
+            }
+        }
+    }
+
+    // --- Native Methods ---
+
+    public native long GetFocusedElement();
     public native int GetControlType(long elementHandle);
 
-    /**
-     * Get the control type as typed enum.
-     */
     public ControlType GetControlTypeAsEnum(long elementHandle) {
         return ControlType.fromUiaId(GetControlType(elementHandle));
     }
 
-    /**
-     * Get the bounding rectangle of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Bounding rectangle as [x, y, width, height]
-     */
-    public native int[] GetBoundingRect(long elementHandle);
-
-    /**
-     * Get the name of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Name of the element
-     */
     public native String GetName(long elementHandle);
-
-    /**
-     * Get the value of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Value of the element
-     */
     public native String GetValue(long elementHandle);
-
-    /**
-     * Set the value of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @param value Value to set
-     */
     public native void SetValue(long elementHandle, String value);
-
-    /**
-     * Get the selection of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Selection as string
-     */
     public native String GetSelection(long elementHandle);
-
-    /**
-     * Set the selection of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @param selection Selection to set
-     */
     public native void SetSelection(long elementHandle, String selection);
-
-    /**
-     * Invoke the default action of a UI element.
-     * @param elementHandle Handle to the UI element
-     */
     public native void Invoke(long elementHandle);
-
-    /**
-     * Expand a UI element.
-     * @param elementHandle Handle to the UI element
-     */
     public native void Expand(long elementHandle);
-
-    /**
-     * Collapse a UI element.
-     * @param elementHandle Handle to the UI element
-     */
     public native void Collapse(long elementHandle);
-
-    /**
-     * Scroll a UI element.
-     * @param elementHandle Handle to the UI element
-     * @param horizontalPercent Horizontal scroll percentage (0-100)
-     * @param verticalPercent Vertical scroll percentage (0-100)
-     */
     public native void Scroll(long elementHandle, double horizontalPercent, double verticalPercent);
-
-    /**
-     * Get the parent element of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Handle to the parent element
-     */
     public native long GetParent(long elementHandle);
-
-    /**
-     * Get the first child element of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Handle to the first child element
-     */
     public native long GetFirstChild(long elementHandle);
-
-    /**
-     * Get the next sibling element of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Handle to the next sibling element
-     */
     public native long GetNextSibling(long elementHandle);
-
-    /**
-     * Get the previous sibling element of a UI element.
-     * @param elementHandle Handle to the UI element
-     * @return Handle to the previous sibling element
-     */
     public native long GetPreviousSibling(long elementHandle);
 
-    // Validation
+    // Geometry
+    public native int[] GetBoundingRectRaw(long elementHandle);
 
-    /**
-     * Check if a native element handle is still valid.
-     */
+    public Rect GetBoundingRect(long elementHandle) {
+        int[] raw = GetBoundingRectRaw(elementHandle);
+        if (raw != null && raw.length == 4) {
+            return new Rect(raw[0], raw[1], raw[2], raw[3]);
+        }
+        return null;
+    }
+
+    // Validation
     public native boolean IsValid(long elementHandle);
 
     // Pattern support checks
-
     public native boolean SupportsValue(long elementHandle);
     public native boolean SupportsInvoke(long elementHandle);
     public native boolean SupportsExpandCollapse(long elementHandle);
     public native boolean SupportsScroll(long elementHandle);
     public native boolean SupportsSelection(long elementHandle);
+    public native boolean SupportsText(long elementHandle);
+    public native boolean SupportsWindow(long elementHandle);
+    public native boolean SupportsLegacyIAccessible(long elementHandle);
+    public native boolean SupportsToggle(long elementHandle);
+    public native boolean SupportsRangeValue(long elementHandle);
+
+    // Event registration (native hooks)
+    public native void StartFocusTracking();
+    public native void StopFocusTracking();
 
 }

@@ -4,14 +4,18 @@ package fastuia;
  * Wrapper around a native UIA element handle.
  * Provides type-safe, object-oriented access to UI Automation elements.
  */
-public class FastUIAElement {
+public final class FastUIAElement {
 
-    final long handle;
-    final FastUIA api;
+    private final long handle;
+    private final FastUIA api;
 
     FastUIAElement(long handle, FastUIA api) {
         this.handle = handle;
         this.api = api;
+    }
+
+    public long handle() {
+        return handle;
     }
 
     /**
@@ -30,9 +34,8 @@ public class FastUIAElement {
 
     /**
      * Get the bounding rectangle of this element.
-     * @return [x, y, width, height] or null
      */
-    public int[] getBoundingRect() {
+    public Rect getBoundingRect() {
         return api.GetBoundingRect(handle);
     }
 
@@ -151,6 +154,26 @@ public class FastUIAElement {
 
     public boolean supportsSelection() {
         return api.SupportsSelection(handle);
+    }
+
+    public boolean supportsText() {
+        return api.SupportsText(handle);
+    }
+
+    public boolean supportsWindow() {
+        return api.SupportsWindow(handle);
+    }
+
+    public boolean supportsLegacyIAccessible() {
+        return api.SupportsLegacyIAccessible(handle);
+    }
+
+    public boolean supportsToggle() {
+        return api.SupportsToggle(handle);
+    }
+
+    public boolean supportsRangeValue() {
+        return api.SupportsRangeValue(handle);
     }
 
     @Override

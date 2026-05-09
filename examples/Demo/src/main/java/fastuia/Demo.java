@@ -18,9 +18,9 @@ public class Demo {
             System.out.println("Name:    " + el.getName());
             System.out.println("Value:   " + el.getValue());
             
-            int[] rect = el.getBoundingRect();
+            Rect rect = el.getBoundingRect();
             if (rect != null) {
-                System.out.printf("Rect:    x=%d, y=%d, w=%d, h=%d%n", rect[0], rect[1], rect[2], rect[3]);
+                System.out.println("Rect:    " + rect);
             }
             
             // Pattern support checks

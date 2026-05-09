@@ -5,7 +5,7 @@ EXPORTS
     
     Java_fastuia_FastUIA_GetFocusedElement
     Java_fastuia_FastUIA_GetControlType
-    Java_fastuia_FastUIA_GetBoundingRect
+    Java_fastuia_FastUIA_GetBoundingRectRaw
     Java_fastuia_FastUIA_GetName
     Java_fastuia_FastUIA_GetValue
     Java_fastuia_FastUIA_SetValue
@@ -25,3 +25,10 @@ EXPORTS
     Java_fastuia_FastUIA_SupportsExpandCollapse
     Java_fastuia_FastUIA_SupportsScroll
     Java_fastuia_FastUIA_SupportsSelection
+    Java_fastuia_FastUIA_SupportsText
+    Java_fastuia_FastUIA_SupportsWindow
+    Java_fastuia_FastUIA_SupportsLegacyIAccessible
+    Java_fastuia_FastUIA_SupportsToggle
+    Java_fastuia_FastUIA_SupportsRangeValue
+    Java_fastuia_FastUIA_StartFocusTracking
+    Java_fastuia_FastUIA_StopFocusTracking
