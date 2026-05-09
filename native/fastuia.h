@@ -7,38 +7,59 @@
 extern "C" {
 #endif
 
-// Export declarations (Matches fastuia.def)
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetFocusedElement(JNIEnv* env, jobject obj);
-JNIEXPORT jint JNICALL Java_fastuia_FastUIA_GetControlType(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_GetBoundingRectRaw(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetName(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetValue(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_SetValue(JNIEnv* env, jobject obj, jlong elementHandle, jstring value);
-JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetSelection(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_SetSelection(JNIEnv* env, jobject obj, jlong elementHandle, jstring selection);
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_Invoke(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_Expand(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_Collapse(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_Scroll(JNIEnv* env, jobject obj, jlong elementHandle, jdouble horizontalPercent, jdouble verticalPercent);
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetParent(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetFirstChild(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetNextSibling(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetPreviousSibling(JNIEnv* env, jobject obj, jlong elementHandle);
+// Core
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetFocusedElement(JNIEnv*, jobject);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeIsValid(JNIEnv*, jobject, jlong);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRelease(JNIEnv*, jobject, jlong);
 
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_IsValid(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsValue(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsInvoke(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsExpandCollapse(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsScroll(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsSelection(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsText(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsWindow(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsLegacyIAccessible(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsToggle(JNIEnv* env, jobject obj, jlong elementHandle);
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsRangeValue(JNIEnv* env, jobject obj, jlong elementHandle);
+// Properties
+JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetName(JNIEnv*, jobject, jlong);
+JNIEXPORT jint JNICALL Java_fastuia_FastUIA_nativeGetControlType(JNIEnv*, jobject, jlong);
+JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_nativeGetBoundingRect(JNIEnv*, jobject, jlong);
 
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_StartFocusTracking(JNIEnv* env, jobject obj);
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_StopFocusTracking(JNIEnv* env, jobject obj);
+// ValuePattern
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsValue(JNIEnv*, jobject, jlong);
+JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetValue(JNIEnv*, jobject, jlong);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeSetValue(JNIEnv*, jobject, jlong, jstring);
+
+// TextPattern
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsText(JNIEnv*, jobject, jlong);
+JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetSelection(JNIEnv*, jobject, jlong);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeSetSelection(JNIEnv*, jobject, jlong, jstring);
+
+// InvokePattern
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsInvoke(JNIEnv*, jobject, jlong);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeInvoke(JNIEnv*, jobject, jlong);
+
+// ExpandCollapsePattern
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsExpandCollapse(JNIEnv*, jobject, jlong);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeExpand(JNIEnv*, jobject, jlong);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeCollapse(JNIEnv*, jobject, jlong);
+
+// ScrollPattern
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsScroll(JNIEnv*, jobject, jlong);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeScroll(JNIEnv*, jobject, jlong, jdouble, jdouble);
+
+// Other Patterns
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsSelection(JNIEnv*, jobject, jlong);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsWindow(JNIEnv*, jobject, jlong);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsLegacyIAccessible(JNIEnv*, jobject, jlong);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsToggle(JNIEnv*, jobject, jlong);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsRangeValue(JNIEnv*, jobject, jlong);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsGrid(JNIEnv*, jobject, jlong);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsGridItem(JNIEnv*, jobject, jlong);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsSelectionItem(JNIEnv*, jobject, jlong);
+
+// Tree Navigation
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetParent(JNIEnv*, jobject, jlong);
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetFirstChild(JNIEnv*, jobject, jlong);
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetNextSibling(JNIEnv*, jobject, jlong);
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetPreviousSibling(JNIEnv*, jobject, jlong);
+
+// Events
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterFocusChanged(JNIEnv*, jobject);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterTextChanged(JNIEnv*, jobject);
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterStructureChanged(JNIEnv*, jobject);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 # FastUIA — Native Windows UI Automation API for Java
 
-**Lightweight native Windows UI Automation capabilities for Java applications.**
+**High-performance, native Windows UI Automation (UIA) for Java.**
 
 [![Build](https://img.shields.io/github/actions/workflow/status/andrestubbe/FastUIA/maven.yml?branch=main)](https://github.com/andrestubbe/FastUIA/actions)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
@@ -13,15 +13,23 @@ FastUIA provides **real-time native UI Automation** for Java applications withou
 ```java
 // Quick Start — Example
 import fastuia.FastUIA;
+import fastuia.FastUIAElement;
 
 public class Demo {
     public static void main(String[] args) {
         FastUIA uia = new FastUIA();
         
-        long focusedElement = uia.GetFocusedElement();
-        String name = uia.GetName(focusedElement);
+        // Get focused element
+        FastUIAElement el = uia.getFocusedElement();
         
-        System.out.println("Focused element: " + name);
+        if (el != null) {
+            System.out.println("Focused: " + el.getName());
+            System.out.println("Type:    " + el.getControlType());
+            
+            if (el.supportsValue()) {
+                System.out.println("Value: " + el.getValue());
+            }
+        }
     }
 }
 ```
@@ -45,6 +53,7 @@ public class Demo {
 - **🚀 Native Performance** — Direct UI Automation API access via JNI.
 - **⚡ Zero Overhead** — No polling, purely event-driven callbacks.
 - **📦 Zero Dependencies** — Just requires Java 17+ and Windows.
+- **🎯 Object-Oriented** — Clean, type-safe API for elements and patterns.
 
 ---
 
@@ -78,52 +87,21 @@ FastJava modules require **two** dependencies: the module itself, and `FastCore`
 </dependencies>
 ```
 
-### Gradle (JitPack)
-```groovy
-repositories {
-    maven { url 'https://jitpack.io' }
-}
-
-dependencies {
-    implementation 'com.github.andrestubbe:fastuia:0.1.0'
-    implementation 'com.github.andrestubbe:fastcore:0.1.0'
-}
-```
-
 ---
 
-## Try the Demo
-
-Want to see it in action without configuring anything? 
-
-1. Clone this repository
-2. Open the `examples/Demo` folder
-3. Run `mvn exec:java`
-
-*Note: The demo automatically downloads the required JitPack dependencies.*
-
----
-
-## API Reference
+## API Reference (FastUIAElement)
 
 | Method | Description |
 |--------|-------------|
-| `long GetFocusedElement()` | Get the currently focused UI element. |
-| `String GetControlType(long elementHandle)` | Get the control type of a UI element. |
-| `int[] GetBoundingRect(long elementHandle)` | Get the bounding rectangle of a UI element. |
-| `String GetName(long elementHandle)` | Get the name of a UI element. |
-| `String GetValue(long elementHandle)` | Get the value of a UI element. |
-| `void SetValue(long elementHandle, String value)` | Set the value of a UI element. |
-| `String GetSelection(long elementHandle)` | Get the selection of a UI element. |
-| `void SetSelection(long elementHandle, String selection)` | Set the selection of a UI element. |
-| `void Invoke(long elementHandle)` | Invoke the default action of a UI element. |
-| `void Expand(long elementHandle)` | Expand a UI element. |
-| `void Collapse(long elementHandle)` | Collapse a UI element. |
-| `void Scroll(long elementHandle, double horizontalPercent, double verticalPercent)` | Scroll a UI element. |
-| `long GetParent(long elementHandle)` | Get the parent element of a UI element. |
-| `long GetFirstChild(long elementHandle)` | Get the first child element of a UI element. |
-| `long GetNextSibling(long elementHandle)` | Get the next sibling element of a UI element. |
-| `long GetPreviousSibling(long elementHandle)` | Get the previous sibling element of a UI element. |
+| `getName()` | Get the name of the UI element. |
+| `getControlType()` | Get the `ControlType` enum value. |
+| `getValue()` / `setValue(String)` | Access the `ValuePattern` if supported. |
+| `getSelection()` / `setSelection(String)` | Access the `TextPattern` if supported. |
+| `invoke()` | Trigger the default action (`InvokePattern`). |
+| `expand()` / `collapse()` | Control `ExpandCollapsePattern`. |
+| `getBoundingRect()` | Get the `Rect` (x, y, w, h). |
+| `getParent()` / `getFirstChild()` | Navigate the UI tree. |
+| `supportsValue()` / `supportsText()` | Check for pattern support. |
 
 ---
 
@@ -157,6 +135,6 @@ MIT License — See [LICENSE](LICENSE) file for details.
 **Made with ⚡ by Andre Stubbe**
 
 <!-- 
-SEO Keywords: java, jni, native, fastjava, ui automation, windows api, performance tuning
-Remember to also add these keywords as Topics in the GitHub repository settings!
+GitHub About: High-performance, native Windows UI Automation (UIA) for Java. Lightweight, event-driven, and architected for real-time system tools, overlays, and automation.
+Topics: java, jni, native, windows-api, ui-automation, uia, performance, low-latency, fastjava, automation-framework
 -->

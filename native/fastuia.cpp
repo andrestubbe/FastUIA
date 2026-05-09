@@ -1,69 +1,79 @@
 #include "fastuia.h"
+#include "fastuia_native.h"
 #include <windows.h>
-#include <uiautomationcore.h>
-#include <stdio.h>
+#include <string>
 
-/**
- * @file fastuia.cpp
- * @brief Native JNI implementation for FastUIA
- */
-
-// Global UI Automation pointer
-IUIAutomation* g_pAutomation = NULL;
-
-// ============================================================================
-// DLL Entry Point
-// ============================================================================
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    switch (ul_reason_for_call) {
-        case DLL_PROCESS_ATTACH:
-            // Initialize UI Automation
-            CoInitialize(NULL);
-            CoCreateInstance(__uuidof(CUIAutomation), NULL, CLSCTX_ALL, 
-                           __uuidof(IUIAutomation), (void**)&g_pAutomation);
-            DisableThreadLibraryCalls(hModule);
-            break;
-        case DLL_PROCESS_DETACH:
-            // Cleanup UI Automation
-            if (g_pAutomation) {
-                g_pAutomation->Release();
-                g_pAutomation = NULL;
-            }
-            CoUninitialize();
-            break;
-    }
-    return TRUE;
+// Helper to convert BSTR to jstring
+jstring BSTRToJString(JNIEnv* env, BSTR bstr) {
+    if (!bstr) return NULL;
+    int len = WideCharToMultiByte(CP_UTF8, 0, bstr, -1, NULL, 0, NULL, NULL);
+    char* buffer = new char[len];
+    WideCharToMultiByte(CP_UTF8, 0, bstr, -1, buffer, len, NULL, NULL);
+    jstring result = env->NewStringUTF(buffer);
+    delete[] buffer;
+    return result;
 }
 
-// ============================================================================
-// JNI Implementations
-// ============================================================================
+// Helper to convert jstring to BSTR
+BSTR JStringToBSTR(JNIEnv* env, jstring str) {
+    if (!str) return NULL;
+    const char* cStr = env->GetStringUTFChars(str, NULL);
+    int wlen = MultiByteToWideChar(CP_UTF8, 0, cStr, -1, NULL, 0);
+    BSTR bstr = SysAllocStringLen(NULL, wlen);
+    MultiByteToWideChar(CP_UTF8, 0, cStr, -1, bstr, wlen);
+    env->ReleaseStringUTFChars(str, cStr);
+    return bstr;
+}
 
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetFocusedElement(JNIEnv* env, jobject obj) {
-    if (!g_pAutomation) return 0;
-    
+// --- JNI Implementation ---
+
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetFocusedElement(JNIEnv* env, jobject obj) {
+    IUIAutomation* automation = FastUIA::instance().automation;
+    if (!automation) return 0;
+
     IUIAutomationElement* pFocused = NULL;
-    if (SUCCEEDED(g_pAutomation->GetFocusedElement(&pFocused)) && pFocused) {
+    if (SUCCEEDED(automation->GetFocusedElement(&pFocused)) && pFocused) {
         return (jlong)pFocused;
     }
     return 0;
 }
 
-JNIEXPORT jint JNICALL Java_fastuia_FastUIA_GetControlType(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeIsValid(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)handle;
+    if (!pElement) return JNI_FALSE;
+    BOOL isOffscreen = FALSE;
+    return SUCCEEDED(pElement->get_CurrentIsOffscreen(&isOffscreen)) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRelease(JNIEnv* env, jobject obj, jlong handle) {
+    FastUIA::releaseElement((IUIAutomationElement*)handle);
+}
+
+JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetName(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)handle;
+    if (!pElement) return NULL;
+    BSTR bstrName;
+    if (SUCCEEDED(pElement->get_CurrentName(&bstrName))) {
+        jstring result = BSTRToJString(env, bstrName);
+        SysFreeString(bstrName);
+        return result;
+    }
+    return NULL;
+}
+
+JNIEXPORT jint JNICALL Java_fastuia_FastUIA_nativeGetControlType(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)handle;
     if (!pElement) return 0;
-    
-    CONTROLTYPEID controlType;
-    if (SUCCEEDED(pElement->get_CurrentControlType(&controlType))) {
-        return (jint)controlType;
+    CONTROLTYPEID typeId;
+    if (SUCCEEDED(pElement->get_CurrentControlType(&typeId))) {
+        return (jint)typeId;
     }
     return 0;
 }
 
-JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_GetBoundingRectRaw(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
+JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_nativeGetBoundingRect(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationElement* pElement = (IUIAutomationElement*)handle;
     if (!pElement) return NULL;
-    
     RECT rect;
     if (SUCCEEDED(pElement->get_CurrentBoundingRectangle(&rect))) {
         jintArray result = env->NewIntArray(4);
@@ -74,146 +84,204 @@ JNIEXPORT jintArray JNICALL Java_fastuia_FastUIA_GetBoundingRectRaw(JNIEnv* env,
     return NULL;
 }
 
-JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetName(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return NULL;
-    
-    BSTR bstrName;
-    if (SUCCEEDED(pElement->get_CurrentName(&bstrName))) {
-        int len = WideCharToMultiByte(CP_UTF8, 0, bstrName, -1, NULL, 0, NULL, NULL);
-        char* buffer = new char[len];
-        WideCharToMultiByte(CP_UTF8, 0, bstrName, -1, buffer, len, NULL, NULL);
-        jstring result = env->NewStringUTF(buffer);
-        delete[] buffer;
-        SysFreeString(bstrName);
-        return result;
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsSelection(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationSelectionPattern* pPattern = NULL;
+    if (SUCCEEDED(((IUIAutomationElement*)handle)->GetCurrentPattern(UIA_SelectionPatternId, (IUnknown**)&pPattern)) && pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
     }
-    return NULL;
+    return JNI_FALSE;
 }
 
-JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetValue(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return NULL;
-    
-    VARIANT varValue;
-    VariantInit(&varValue);
-    if (SUCCEEDED(pElement->get_CurrentValue(&varValue)) && varValue.vt == VT_BSTR) {
-        int len = WideCharToMultiByte(CP_UTF8, 0, varValue.bstrVal, -1, NULL, 0, NULL, NULL);
-        char* buffer = new char[len];
-        WideCharToMultiByte(CP_UTF8, 0, varValue.bstrVal, -1, buffer, len, NULL, NULL);
-        jstring result = env->NewStringUTF(buffer);
-        delete[] buffer;
-        VariantClear(&varValue);
-        return result;
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsWindow(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationWindowPattern* pPattern = NULL;
+    if (SUCCEEDED(((IUIAutomationElement*)handle)->GetCurrentPattern(UIA_WindowPatternId, (IUnknown**)&pPattern)) && pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
     }
-    VariantClear(&varValue);
-    return NULL;
+    return JNI_FALSE;
 }
 
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_SetValue(JNIEnv* env, jobject obj, jlong elementHandle, jstring value) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement || !value) return;
-    
-    const char* cValue = env->GetStringUTFChars(value, NULL);
-    int wlen = MultiByteToWideChar(CP_UTF8, 0, cValue, -1, NULL, 0);
-    BSTR bstrValue = SysAllocStringLen(NULL, wlen);
-    MultiByteToWideChar(CP_UTF8, 0, cValue, -1, bstrValue, wlen);
-    
-    IUIAutomationValuePattern* pValuePattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ValuePatternId, (IUnknown**)&pValuePattern))) {
-        pValuePattern->SetValue(bstrValue);
-        pValuePattern->Release();
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsLegacyIAccessible(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationLegacyIAccessiblePattern* pPattern = NULL;
+    if (SUCCEEDED(((IUIAutomationElement*)handle)->GetCurrentPattern(UIA_LegacyIAccessiblePatternId, (IUnknown**)&pPattern)) && pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
     }
-    
-    env->ReleaseStringUTFChars(value, cValue);
-    SysFreeString(bstrValue);
+    return JNI_FALSE;
 }
 
-JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_GetSelection(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return NULL;
-    
-    IUIAutomationSelectionPattern* pSelectionPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_SelectionPatternId, (IUnknown**)&pSelectionPattern))) {
-        IUIAutomationElementArray* pSelection = NULL;
-        if (SUCCEEDED(pSelectionPattern->GetCurrentSelection(&pSelection))) {
-            int count = 0;
-            pSelection->get_Length(&count);
-            // For simplicity, return count as string
-            char buffer[32];
-            sprintf_s(buffer, "%d items selected", count);
-            pSelection->Release();
-            pSelectionPattern->Release();
-            return env->NewStringUTF(buffer);
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsToggle(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationTogglePattern* pPattern = NULL;
+    if (SUCCEEDED(((IUIAutomationElement*)handle)->GetCurrentPattern(UIA_TogglePatternId, (IUnknown**)&pPattern)) && pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsRangeValue(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationRangeValuePattern* pPattern = NULL;
+    if (SUCCEEDED(((IUIAutomationElement*)handle)->GetCurrentPattern(UIA_RangeValuePatternId, (IUnknown**)&pPattern)) && pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsGrid(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationGridPattern* pPattern = NULL;
+    if (SUCCEEDED(((IUIAutomationElement*)handle)->GetCurrentPattern(UIA_GridPatternId, (IUnknown**)&pPattern)) && pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsGridItem(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationGridItemPattern* pPattern = NULL;
+    if (SUCCEEDED(((IUIAutomationElement*)handle)->GetCurrentPattern(UIA_GridItemPatternId, (IUnknown**)&pPattern)) && pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsSelectionItem(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationSelectionItemPattern* pPattern = NULL;
+    if (SUCCEEDED(((IUIAutomationElement*)handle)->GetCurrentPattern(UIA_SelectionItemPatternId, (IUnknown**)&pPattern)) && pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsValue(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationValuePattern* pPattern = FastUIA::instance().getValuePattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetValue(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationValuePattern* pPattern = FastUIA::instance().getValuePattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        BSTR bstrValue;
+        if (SUCCEEDED(pPattern->get_CurrentValue(&bstrValue))) {
+            jstring result = BSTRToJString(env, bstrValue);
+            SysFreeString(bstrValue);
+            pPattern->Release();
+            return result;
         }
-        pSelectionPattern->Release();
+        pPattern->Release();
     }
     return NULL;
 }
 
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_SetSelection(JNIEnv* env, jobject obj, jlong elementHandle, jstring selection) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return;
-    
-    IUIAutomationSelectionItemPattern* pSelectionItemPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_SelectionItemPatternId, (IUnknown**)&pSelectionItemPattern))) {
-        pSelectionItemPattern->Select();
-        pSelectionItemPattern->Release();
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeSetValue(JNIEnv* env, jobject obj, jlong handle, jstring value) {
+    IUIAutomationValuePattern* pPattern = FastUIA::instance().getValuePattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        BSTR bstrValue = JStringToBSTR(env, value);
+        pPattern->SetValue(bstrValue);
+        SysFreeString(bstrValue);
+        pPattern->Release();
     }
 }
 
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_Invoke(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return;
-    
-    IUIAutomationInvokePattern* pInvokePattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_InvokePatternId, (IUnknown**)&pInvokePattern))) {
-        pInvokePattern->Invoke();
-        pInvokePattern->Release();
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsText(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationTextPattern* pPattern = FastUIA::instance().getTextPattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetSelection(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationTextPattern* pPattern = FastUIA::instance().getTextPattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        IUIAutomationTextRangeArray* pRanges = NULL;
+        if (SUCCEEDED(pPattern->get_SupportedTextSelection(&pRanges)) && pRanges) {
+            // Simplified: return a placeholder or implement range extraction
+            pRanges->Release();
+            pPattern->Release();
+            return env->NewStringUTF("Selection supported");
+        }
+        pPattern->Release();
+    }
+    return NULL;
+}
+
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeSetSelection(JNIEnv* env, jobject obj, jlong handle, jstring text) {
+    // Requires complex TextRange manipulation
+}
+
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsInvoke(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationInvokePattern* pPattern = FastUIA::instance().getInvokePattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeInvoke(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationInvokePattern* pPattern = FastUIA::instance().getInvokePattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->Invoke();
+        pPattern->Release();
     }
 }
 
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_Expand(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return;
-    
-    IUIAutomationExpandCollapsePattern* pExpandPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ExpandCollapsePatternId, (IUnknown**)&pExpandPattern))) {
-        pExpandPattern->Expand();
-        pExpandPattern->Release();
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsExpandCollapse(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationExpandCollapsePattern* pPattern = FastUIA::instance().getExpandCollapsePattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeExpand(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationExpandCollapsePattern* pPattern = FastUIA::instance().getExpandCollapsePattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->Expand();
+        pPattern->Release();
     }
 }
 
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_Collapse(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return;
-    
-    IUIAutomationExpandCollapsePattern* pCollapsePattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ExpandCollapsePatternId, (IUnknown**)&pCollapsePattern))) {
-        pCollapsePattern->Collapse();
-        pCollapsePattern->Release();
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeCollapse(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationExpandCollapsePattern* pPattern = FastUIA::instance().getExpandCollapsePattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->Collapse();
+        pPattern->Release();
     }
 }
 
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_Scroll(JNIEnv* env, jobject obj, jlong elementHandle, jdouble horizontalPercent, jdouble verticalPercent) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return;
-    
-    IUIAutomationScrollPattern* pScrollPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ScrollPatternId, (IUnknown**)&pScrollPattern))) {
-        pScrollPattern->SetScrollPercent(horizontalPercent, verticalPercent);
-        pScrollPattern->Release();
+JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_nativeSupportsScroll(JNIEnv* env, jobject obj, jlong handle) {
+    IUIAutomationScrollPattern* pPattern = FastUIA::instance().getScrollPattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->Release();
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeScroll(JNIEnv* env, jobject obj, jlong handle, jdouble h, jdouble v) {
+    IUIAutomationScrollPattern* pPattern = FastUIA::instance().getScrollPattern((IUIAutomationElement*)handle);
+    if (pPattern) {
+        pPattern->SetScrollPercent(h, v);
+        pPattern->Release();
     }
 }
 
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetParent(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement || !g_pAutomation) return 0;
-    
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetParent(JNIEnv* env, jobject obj, jlong handle) {
     IUIAutomationTreeWalker* pWalker = NULL;
-    if (SUCCEEDED(g_pAutomation->get_ControlViewWalker(&pWalker))) {
+    if (SUCCEEDED(FastUIA::instance().automation->get_ControlViewWalker(&pWalker))) {
         IUIAutomationElement* pParent = NULL;
-        if (SUCCEEDED(pWalker->GetParentElement(pElement, &pParent))) {
+        if (SUCCEEDED(pWalker->GetParentElement((IUIAutomationElement*)handle, &pParent))) {
             pWalker->Release();
             return (jlong)pParent;
         }
@@ -222,192 +290,53 @@ JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetParent(JNIEnv* env, jobject obj,
     return 0;
 }
 
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetFirstChild(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement || !g_pAutomation) return 0;
-    
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetFirstChild(JNIEnv* env, jobject obj, jlong handle) {
     IUIAutomationTreeWalker* pWalker = NULL;
-    if (SUCCEEDED(g_pAutomation->get_ControlViewWalker(&pWalker))) {
-        IUIAutomationElement* pFirstChild = NULL;
-        if (SUCCEEDED(pWalker->GetFirstChildElement(pElement, &pFirstChild))) {
+    if (SUCCEEDED(FastUIA::instance().automation->get_ControlViewWalker(&pWalker))) {
+        IUIAutomationElement* pFirst = NULL;
+        if (SUCCEEDED(pWalker->GetFirstChildElement((IUIAutomationElement*)handle, &pFirst))) {
             pWalker->Release();
-            return (jlong)pFirstChild;
+            return (jlong)pFirst;
         }
         pWalker->Release();
     }
     return 0;
 }
 
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetNextSibling(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement || !g_pAutomation) return 0;
-    
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetNextSibling(JNIEnv* env, jobject obj, jlong handle) {
     IUIAutomationTreeWalker* pWalker = NULL;
-    if (SUCCEEDED(g_pAutomation->get_ControlViewWalker(&pWalker))) {
-        IUIAutomationElement* pNextSibling = NULL;
-        if (SUCCEEDED(pWalker->GetNextSiblingElement(pElement, &pNextSibling))) {
+    if (SUCCEEDED(FastUIA::instance().automation->get_ControlViewWalker(&pWalker))) {
+        IUIAutomationElement* pNext = NULL;
+        if (SUCCEEDED(pWalker->GetNextSiblingElement((IUIAutomationElement*)handle, &pNext))) {
             pWalker->Release();
-            return (jlong)pNextSibling;
+            return (jlong)pNext;
         }
         pWalker->Release();
     }
     return 0;
 }
 
-JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_GetPreviousSibling(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement || !g_pAutomation) return 0;
-    
+JNIEXPORT jlong JNICALL Java_fastuia_FastUIA_nativeGetPreviousSibling(JNIEnv* env, jobject obj, jlong handle) {
     IUIAutomationTreeWalker* pWalker = NULL;
-    if (SUCCEEDED(g_pAutomation->get_ControlViewWalker(&pWalker))) {
-        IUIAutomationElement* pPrevSibling = NULL;
-        if (SUCCEEDED(pWalker->GetPreviousSiblingElement(pElement, &pPrevSibling))) {
+    if (SUCCEEDED(FastUIA::instance().automation->get_ControlViewWalker(&pWalker))) {
+        IUIAutomationElement* pPrev = NULL;
+        if (SUCCEEDED(pWalker->GetPreviousSiblingElement((IUIAutomationElement*)handle, &pPrev))) {
             pWalker->Release();
-            return (jlong)pPrevSibling;
+            return (jlong)pPrev;
         }
         pWalker->Release();
     }
     return 0;
 }
 
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_IsValid(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    BOOL isOffscreen = FALSE;
-    HRESULT hr = pElement->get_CurrentIsOffscreen(&isOffscreen);
-    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterFocusChanged(JNIEnv* env, jobject obj) {
+    // Stub
 }
 
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsValue(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationValuePattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ValuePatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterTextChanged(JNIEnv* env, jobject obj) {
+    // Stub
 }
 
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsInvoke(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationInvokePattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_InvokePatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsExpandCollapse(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationExpandCollapsePattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ExpandCollapsePatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsScroll(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationScrollPattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_ScrollPatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsSelection(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationSelectionPattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_SelectionPatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsText(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationTextPattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_TextPatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsWindow(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationWindowPattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_WindowPatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsLegacyIAccessible(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationLegacyIAccessiblePattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_LegacyIAccessiblePatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsToggle(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationTogglePattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_TogglePatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fastuia_FastUIA_SupportsRangeValue(JNIEnv* env, jobject obj, jlong elementHandle) {
-    IUIAutomationElement* pElement = (IUIAutomationElement*)elementHandle;
-    if (!pElement) return JNI_FALSE;
-    
-    IUIAutomationRangeValuePattern* pPattern = NULL;
-    if (SUCCEEDED(pElement->GetCurrentPattern(UIA_RangeValuePatternId, (IUnknown**)&pPattern))) {
-        if (pPattern) pPattern->Release();
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
-}
-
-// Event Tracking (Stubs — full implementation requires IUIAutomationEventHandler)
-
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_StartFocusTracking(JNIEnv* env, jobject obj) {
-    // TODO: Register IUIAutomationFocusChangedEventHandler
-    // This requires implementing a COM event handler class
-    printf("[FastUIA] StartFocusTracking called (stub)\n");
-}
-
-JNIEXPORT void JNICALL Java_fastuia_FastUIA_StopFocusTracking(JNIEnv* env, jobject obj) {
-    // TODO: Unregister focus event handler
-    printf("[FastUIA] StopFocusTracking called (stub)\n");
+JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterStructureChanged(JNIEnv* env, jobject obj) {
+    // Stub
 }
