@@ -6,8 +6,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.andrestubbe</groupId>
-    <artifactId>fastuia-benchmark</artifactId>
-    <version>0.1.0</version>
+            <artifactId>fastuia-benchmark</artifactId>
+            <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <name>FastUIA Benchmark</name>
@@ -35,9 +35,9 @@
         </dependency>
         
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastcore</artifactId>
-            <version>v0.1.0</version>
+            <version>0.1.0</version>
         </dependency>
     </dependencies>
 
@@ -63,3 +63,5 @@
         </plugins>
     </build>
 </project>
+
+

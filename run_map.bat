@@ -1,6 +1,9 @@
 @echo off
-echo [FastUIA] Starting Map Overlay Demo...
+echo ⚡ Building Main Project...
+call mvn clean package -DskipTests
+if %ERRORLEVEL% NEQ 0 ( pause & exit /b )
+echo 🚀 Running Hero Demo...
 cd examples\Demo
-call mvn compile exec:java -Dexec.mainClass="fastuia.UIAMapOverlay"
+call mvn compile exec:java -Dexec.mainClass=fastuia.UIAMapOverlay
 cd ..\..
 pause
