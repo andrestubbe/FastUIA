@@ -34,3 +34,6 @@ EXPORTS
     Java_fastuia_FastUIA_nativeRegisterFocusChanged
     Java_fastuia_FastUIA_nativeRegisterTextChanged
     Java_fastuia_FastUIA_nativeRegisterStructureChanged
+    Java_fastuia_FastUIA_nativeGetFrameworkId
+    Java_fastuia_FastUIA_nativeGetAutomationId
+    Java_fastuia_FastUIA_nativeGetProcessId

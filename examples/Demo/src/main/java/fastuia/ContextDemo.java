@@ -30,17 +30,37 @@ public class ContextDemo {
 
             if (!el.isValid()) {
                 System.out.println("[DEBUG] Focused element handle " + el.handle() + " is invalid.");
+                el.release();
                 Thread.sleep(200);
                 continue;
             }
 
             // Display info only when focus changes
             if (last == null || el.handle() != last.handle()) {
+                if (last != null) last.release();
 
                 System.out.println("\n[EVENT] Focus Changed -> Handle: " + el.handle());
                 System.out.println("--------------------------------------------------");
 
+                // Try to find the "Program" (Top-Level Window)
+                String programName = "Unknown";
+                try {
+                    FastUIAElement parent = el;
+                    // Walk up the tree a bit to find a window
+                    for(int i=0; i<5; i++) {
+                        if (parent.getControlType() == ControlType.WINDOW) {
+                            programName = parent.getName();
+                            break;
+                        }
+                        FastUIAElement nextParent = parent.getParent();
+                        if (nextParent == null) break;
+                        if (parent != el) parent.release(); // Release intermediate parents
+                        parent = nextParent;
+                    }
+                } catch (Exception ignored) {}
+
                 // 1. Identity
+                System.out.println("[DATA] Program: " + programName);
                 String name = el.getName();
                 ControlType type = el.getControlType();
                 System.out.println("[DATA] Name: " + (name != null ? "\"" + name + "\"" : "<null>"));

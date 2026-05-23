@@ -26,6 +26,20 @@ public final class FastUIA {
         return handle != 0 ? new FastUIAElement(handle, this) : null;
     }
 
+    public FastUIAElement getRootElement() {
+        long handle = nativeGetRootElement();
+        return handle != 0 ? new FastUIAElement(handle, this) : null;
+    }
+
+    public FastUIAElement getElementFromPoint(int x, int y) {
+        long handle = nativeGetElementFromPoint(x, y);
+        return handle != 0 ? new FastUIAElement(handle, this) : null;
+    }
+
+    public void setClickThrough(String windowTitle, boolean enabled) {
+        nativeSetClickThrough(windowTitle, enabled);
+    }
+
     public FastUIAElement fromHandle(long handle) {
         return handle != 0 ? new FastUIAElement(handle, this) : null;
     }
@@ -95,6 +109,8 @@ public final class FastUIA {
 
     // Core
     private native long nativeGetFocusedElement();
+    private native long nativeGetRootElement();
+    private native long nativeGetElementFromPoint(int x, int y);
     private native boolean nativeIsValid(long handle);
     private native void nativeRelease(long handle);
 
@@ -102,6 +118,9 @@ public final class FastUIA {
     private native String nativeGetName(long handle);
     private native int nativeGetControlType(long handle);
     private native int[] nativeGetBoundingRect(long handle);
+
+    // Utils
+    private native void nativeSetClickThrough(String title, boolean enabled);
 
     // ValuePattern
     private native boolean nativeSupportsValue(long handle);
@@ -146,6 +165,10 @@ public final class FastUIA {
     private native void nativeRegisterTextChanged();
     private native void nativeRegisterStructureChanged();
 
+    private native String nativeGetFrameworkId(long handle);
+    private native String nativeGetAutomationId(long handle);
+    private native int nativeGetProcessId(long handle);
+
     // --- Internal Helpers for FastUIAElement ---
 
     boolean isValid(long handle) { return nativeIsValid(handle); }
@@ -187,4 +210,14 @@ public final class FastUIA {
     long getFirstChild(long handle) { return nativeGetFirstChild(handle); }
     long getNextSibling(long handle) { return nativeGetNextSibling(handle); }
     long getPreviousSibling(long handle) { return nativeGetPreviousSibling(handle); }
+
+    String getFrameworkId(long handle) {
+        try { return nativeGetFrameworkId(handle); } catch (UnsatisfiedLinkError e) { return "Native Link Pending"; }
+    }
+    String getAutomationId(long handle) {
+        try { return nativeGetAutomationId(handle); } catch (UnsatisfiedLinkError e) { return ""; }
+    }
+    int getProcessId(long handle) {
+        try { return nativeGetProcessId(handle); } catch (UnsatisfiedLinkError e) { return 0; }
+    }
 }

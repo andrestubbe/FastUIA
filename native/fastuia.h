@@ -61,6 +61,11 @@ JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterFocusChanged(JNIEnv*, 
 JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterTextChanged(JNIEnv*, jobject);
 JNIEXPORT void JNICALL Java_fastuia_FastUIA_nativeRegisterStructureChanged(JNIEnv*, jobject);
 
+// Extended Properties
+JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetFrameworkId(JNIEnv*, jobject, jlong);
+JNIEXPORT jstring JNICALL Java_fastuia_FastUIA_nativeGetAutomationId(JNIEnv*, jobject, jlong);
+JNIEXPORT jint JNICALL Java_fastuia_FastUIA_nativeGetProcessId(JNIEnv*, jobject, jlong);
+
 #ifdef __cplusplus
 }
 #endif

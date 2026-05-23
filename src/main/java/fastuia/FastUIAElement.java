@@ -6,12 +6,19 @@ package fastuia;
  */
 public final class FastUIAElement {
 
-    private final long handle;
+    private long handle;
     private final FastUIA api;
 
     FastUIAElement(long handle, FastUIA api) {
         this.handle = handle;
         this.api = api;
+    }
+
+    public void release() {
+        if (handle != 0) {
+            api.release(handle);
+            handle = 0;
+        }
     }
 
     public long handle() {
@@ -132,6 +139,18 @@ public final class FastUIAElement {
     public FastUIAElement getPreviousSibling() {
         long sibling = api.getPreviousSibling(handle);
         return sibling != 0 ? new FastUIAElement(sibling, api) : null;
+    }
+
+    public String getFrameworkId() {
+        return api.getFrameworkId(handle);
+    }
+
+    public String getAutomationId() {
+        return api.getAutomationId(handle);
+    }
+
+    public int getProcessId() {
+        return api.getProcessId(handle);
     }
 
     // Pattern support checks

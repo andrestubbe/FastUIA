@@ -17,6 +17,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <exec.mainClass>fastuia.FocusLogger</exec.mainClass>
     </properties>
 
     <repositories>
@@ -42,13 +43,13 @@
         <dependency>
             <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastuia</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.5</version>
         </dependency>
         
         <dependency>
             <groupId>io.github.andrestubbe</groupId>
             <artifactId>fastcore</artifactId>
-            <version>1.0.0</version>
+            <version>v0.1.0</version>
         </dependency>
     </dependencies>
 
@@ -68,7 +69,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>fastuia.InspectorGUI</mainClass>
+                    <mainClass>${exec.mainClass}</mainClass>
                 </configuration>
             </plugin>
         </plugins>
