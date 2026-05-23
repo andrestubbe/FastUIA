@@ -1,4 +1,4 @@
-# FastUIA — Native Windows UI Automation API for Java
+﻿# FastUIA — Native Windows UI Automation API for Java
 
 **High-performance, native Windows UI Automation (UIA) for Java.**
 
