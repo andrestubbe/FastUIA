@@ -2,12 +2,6 @@
 
 **High-performance, native Windows UI Automation (UIA) for Java.**
 
-[![Build](https://img.shields.io/github/actions/workflow/status/andrestubbe/FastUIA/maven.yml?branch=main)](https://github.com/andrestubbe/FastUIA/actions)
-[![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![JitPack](https://jitpack.io/v/andrestubbe/FastUIA.svg)](https://jitpack.io/#andrestubbe/FastUIA)
-
 FastUIA provides **real-time native UI Automation** for Java applications without the overhead of heavy frameworks. 
 
 ```java
@@ -33,6 +27,12 @@ public class Demo {
     }
 }
 ```
+
+[![Status](https://img.shields.io/badge/status-v0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastUIA/releases/tag/v0.1.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
+[![JitPack](https://img.shields.io/badge/JitPack-ready-green.svg)](https://jitpack.io/#andrestubbe)
 
 ---
 
