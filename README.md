@@ -125,19 +125,22 @@ dependencies {
 
 ---
 
-## Platform Support
+## Documentation
 
-| Platform            | Status            |
-|---------------------|-------------------|
-| Windows 10/11 (x64) | ✅ Fully Supported |
-| Linux               | 🚧 Planned        |
-| macOS               | 🚧 Planned        |
+* **[COMPILE.md](COMPILE.md)**: Full compilation guide (MSVC C++17 build chain + JNI Setup).
+* **[REFERENCE.md](REFERENCE.md)**: Full API descriptions, border configurations, and codepoint index.
+* **[PHILOSOPHIE.md](PHILOSOPHIE.md)**: The engineering rationale for zero-allocation performance.
+* **[ROADMAP.md](ROADMAP.md)**: Future milestones and planned features.
 
 ---
 
-## Building from Source
+## Platform Support
 
-For detailed instructions on compiling the C++ JNI code and building the Maven FatJAR, see [COMPILE.md](COMPILE.md).
+| Platform      | Status            |
+|---------------|-------------------|
+| Windows 10/11 | ✅ Fully Supported |
+| Linux         | 🚧 Planned        |
+| macOS         | 🚧 Planned        |
 
 ---
 
@@ -149,18 +152,14 @@ MIT License — See [LICENSE](LICENSE) file for details.
 
 ## Related Projects
 
-- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader for Java
-- [FastKeyboard](https://github.com/andrestubbe/FastKeyboard) — High-performance RawInput engine
-- [FastTheme](https://github.com/andrestubbe/FastTheme) — Advanced UI styling engine
+- [FastFileIndex](https://github.com/andrestubbe/FastFileIndex) - Binary file indexing with mmap support
+- [FastFileSearch](https://github.com/andrestubbe/FastFileSearch) - Prefix Trie, N-Gram index, and Ranking engine
+- [FastFileWatch](https://github.com/andrestubbe/FastFileWatch) - USN Journal-based live file monitoring
+- [FastCore](https://github.com/andrestubbe/FastCore) - Unified JNI loader and platform abstraction
 
 ---
-**Part of the FastJava Ecosystem** — *Making the JVM faster.*
 
+**Part of the FastJava Ecosystem** — *Making the JVM faster. Small package. Maximum speed. Zero bloat. 🚀📋*
 
-
-<!-- 
-GitHub About: High-performance, native Windows UI Automation (UIA) for Java. Lightweight, event-driven, and architected for real-time system tools, overlays, and automation.
-Topics: java, jni, native, windows-api, ui-automation, uia, performance, low-latency, fastjava, automation-framework
--->
 
 
