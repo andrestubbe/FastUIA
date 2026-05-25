@@ -12,31 +12,6 @@ FastUIA provides **real-time native UI Automation** for Java applications withou
 
 [![FastKeyboard Showcase](docs/screenshot.png)](https://www.youtube.com/watch?v=BZsqQl7WqWk)
 
-```java
-// Quick Start — Example
-
-import fastuia.FastUIA;
-import fastuia.FastUIAElement;
-
-public class Demo {
-    public static void main(String[] args) {
-        FastUIA uia = new FastUIA();
-
-        // Get focused element
-        FastUIAElement el = uia.getFocusedElement();
-
-        if (el != null) {
-            System.out.println("Focused: " + el.getName());
-            System.out.println("Type:    " + el.getControlType());
-
-            if (el.supportsValue()) {
-                System.out.println("Value: " + el.getValue());
-            }
-        }
-    }
-}
-```
-
 ---
 
 ## Table of Contents
@@ -49,6 +24,30 @@ public class Demo {
 - [Building from Source](#building-from-source)
 - [License](#license)
 - [Related Projects](#related-projects)
+
+---
+
+```java
+// Quick Start — Example
+
+import fastuia.FastUIA;
+import fastuia.FastUIAElement;
+
+public class Demo {
+    public static void main(String[] args) {
+        FastUIA uia = new FastUIA();
+        // Get focused element
+        FastUIAElement el = uia.getFocusedElement();
+        if (el != null) {
+            System.out.println("Focused: " + el.getName());
+            System.out.println("Type:    " + el.getControlType());
+            if (el.supportsValue()) {
+                System.out.println("Value: " + el.getValue());
+            }
+        }
+    }
+}
+```
 
 ---
 
