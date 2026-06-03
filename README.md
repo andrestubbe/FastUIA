@@ -1,4 +1,4 @@
-﻿# FastUIA v0.1.0 [ALPHA] — Native Windows UI Automation API for Java
+# FastUIA v0.1.0 [ALPHA] � Native Windows UI Automation API for Java
 
 [![Status](https://img.shields.io/badge/status-v0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastUIA/releases/tag/v0.1.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -6,7 +6,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
 [![JitPack](https://img.shields.io/badge/JitPack-ready-green.svg)](https://jitpack.io/#andrestubbe)
 
-**⚡ High-performance, native Windows UI Automation (UIA) for Java.**
+**? High-performance, native Windows UI Automation (UIA) for Java.**
 
 FastUIA provides **real-time native UI Automation** for Java applications without the overhead of heavy frameworks.
 
@@ -28,7 +28,7 @@ FastUIA provides **real-time native UI Automation** for Java applications withou
 ---
 
 ```java
-// Quick Start — Example
+// Quick Start � Example
 
 import fastuia.FastUIA;
 import fastuia.FastUIAElement;
@@ -53,10 +53,10 @@ public class Demo {
 
 ## Key Features
 
-- **🚀 Native Performance** — Direct UI Automation API access via JNI.
-- **⚡ Zero Overhead** — No polling, purely event-driven callbacks.
-- **📦 Zero Dependencies** — Just requires Java 17+ and Windows.
-- **🎯 Object-Oriented** — Clean, type-safe API for elements and patterns.
+- **?? Native Performance** � Direct UI Automation API access via JNI.
+- **? Zero Overhead** � No polling, purely event-driven callbacks.
+- **?? Zero Dependencies** � Just requires Java 17+ and Windows.
+- **?? Object-Oriented** � Clean, type-safe API for elements and patterns.
 
 ---
 
@@ -128,7 +128,7 @@ dependencies {
 
 * **[COMPILE.md](docs/COMPILE.md)**: Full compilation guide (MSVC C++17 build chain + JNI Setup).
 * **[REFERENCE.md](docs/REFERENCE.md)**: Full API descriptions, border configurations, and codepoint index.
-* **[PHILOSOPHIE.md](docs/PHILOSOPHIE.md)**: The engineering rationale for zero-allocation performance.
+* **[PHILOSOPHY.md](docs/PHILOSOPHY.md)**: The engineering rationale for zero-allocation performance.
 * **[ROADMAP.md](docs/ROADMAP.md)**: Future milestones and planned features.
 
 ---
@@ -137,15 +137,15 @@ dependencies {
 
 | Platform      | Status            |
 |---------------|-------------------|
-| Windows 10/11 | ✅ Fully Supported |
-| Linux         | 🚧 Planned        |
-| macOS         | 🚧 Planned        |
+| Windows 10/11 | ? Fully Supported |
+| Linux         | ?? Planned        |
+| macOS         | ?? Planned        |
 
 ---
 
 ## License
 
-MIT License — See [LICENSE](LICENSE) file for details.
+MIT License � See [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -158,7 +158,7 @@ MIT License — See [LICENSE](LICENSE) file for details.
 
 ---
 
-**Part of the FastJava Ecosystem** — *Making the JVM faster. Small package. Maximum speed. Zero bloat. 🚀📋*
+**Part of the FastJava Ecosystem** � *Making the JVM faster. Small package. Maximum speed. Zero bloat. ????*
 
 
 
