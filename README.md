@@ -14,19 +14,6 @@ FastUIA provides **real-time native UI Automation** for Java applications withou
 
 ---
 
-## Table of Contents
-
-- [Key Features](#key-features)
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [API Reference](#api-reference)
-- [Documentation](#documentation)
-- [Platform Support](#platform-support)
-- [License](#license)
-- [Related Projects](#related-projects)
-
----
-
 ## Quick Start
 
 ```java
@@ -49,6 +36,22 @@ public class Demo {
 ```
 
 ---
+
+---
+
+## Table of Contents
+
+- [Key Features](#key-features)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [API Reference](#api-reference)
+- [Documentation](#documentation)
+- [Platform Support](#platform-support)
+- [License](#license)
+- [Related Projects](#related-projects)
+
+---
+
 
 ## Key Features
 
