@@ -10,6 +10,8 @@
 
 FastUIA provides **real-time native UI Automation** for Java applications without the overhead of heavy frameworks.
 
+Watch Demo (YouTube) | Watch JMH Benchmark (YouTube)
+
 [![FastUIA Showcase](docs/screenshot.png)](https://www.youtube.com/watch?v=BZsqQl7WqWk)
 
 ---
