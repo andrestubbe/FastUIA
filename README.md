@@ -12,9 +12,9 @@
 
 **FastUIA** provides low-latency native UI Automation for Java by communicating directly with the Windows `IUIAutomation` COM interfaces via JNI, bypassing the marshaling overhead of standard frameworks. Designed for AI agents, RPA bots, and desktop automation systems that need to read and interact with UI elements at millisecond speed using **[FastCore](https://github.com/andrestubbe/FastCore)** for seamless native library loading.
 
-[**Watch Showcase Demo (YouTube)**](https://www.youtube.com/watch?v=BZsqQl7WqWk)
+[**Watch Showcase Demo (YouTube)**](https://youtu.be/CK4PaWDHq8w)
 
-[![FastUIA Showcase](docs/screenshot.png)](https://www.youtube.com/watch?v=BZsqQl7WqWk)
+[![FastUIA Showcase](docs/screenshot.png)](https://youtu.be/CK4PaWDHq8w)
 
 ---
 
