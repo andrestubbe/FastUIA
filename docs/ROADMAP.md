@@ -1,31 +1,45 @@
-# FastUIA Roadmap 🗺️
+# FastUIA Roadmap
 
-**Vision:** To provide the fastest possible native primitives for UI automation by aggressively bypassing bottlenecks in standard Java.
-
-## 🟢 v0.1.0: Initial Release (Current)
-- [x] **Core Native Engine**: Basic JNI implementation.
-- [x] **Blueprint Standards**: README, Reference, and Philosophy integration.
-- [ ] **Core API**: GetFocusedElement(), GetControlType(), GetBoundingRect()
-- [ ] **Element Access**: GetName(), GetValue(), SetValue()
-- [ ] **Selection**: GetSelection(), SetSelection()
-- [ ] **Actions**: Invoke(), ExpandCollapse(), Scroll()
-- [ ] **Traversal**: Parent/Child/Sibling navigation
-- [ ] **Basic Performance Suite**: Initial benchmarks vs standard Java
-
-## 🟡 v0.2.0: Advanced Automation
-- [ ] **Pattern Matching**: Advanced element finding strategies
-- [ ] **Event Handling**: UI event capture and automation
-- [ ] **FastAgent Integration**: Tool executor for agentic AI
-- [ ] **Performance Optimization**: Zero-copy element access
-
-## 🟠 v0.5.0: Platform Expansion
-- [ ] **Cross-Platform**: Linux/macOS UI Automation support
-- [ ] **Advanced Patterns**: Complex UI interaction patterns
-- [ ] **Visual Recognition**: Integration with FastVision for UI understanding
-
-## 🔴 v1.0.0: Production Hardening
-- [ ] **Full Stability Audit**: Long-run stress testing
-- [ ] **Enterprise Support**: NUMA-awareness and Large Pages support
+**Vision**: To provide the fastest possible native primitives for Windows UI Automation in Java by aggressively bypassing the COM marshaling overhead of standard frameworks.
 
 ---
-**Focus:** Performance is our USP. We optimize where Java stops.
+
+## v0.1.0: Initial Release (Current)
+
+- [x] **Core Native Engine**: JNI bindings to `IUIAutomation` and `IUIAutomationElement` COM interfaces.
+- [x] **Element Retrieval**: `getFocusedElement()`, `getRootElement()`, `getElementFromPoint(x, y)`.
+- [x] **Element Properties**: `getName()`, `getControlType()`, `getBoundingRect()`, `getAutomationId()`, `getFrameworkId()`, `getProcessId()`.
+- [x] **Pattern Support**: `ValuePattern`, `TextPattern`, `InvokePattern`, `ExpandCollapsePattern`, `ScrollPattern`, and 8 further pattern checks.
+- [x] **Tree Traversal**: `getParent()`, `getFirstChild()`, `getNextSibling()`, `getPreviousSibling()`.
+- [x] **Event System**: `FocusChangedListener`, `TextChangedListener`, `StructureChangedListener` backed by native COM event sinks.
+- [x] **FastCore Integration**: Automated native DLL extraction and loading via `FastCore.loadLibrary`.
+- [x] **FastJava Blueprint Standards**: README, Reference, Philosophy, Roadmap, Changelog, JMH Benchmark.
+
+---
+
+## v0.2.0: Advanced Automation
+
+- [ ] **Condition-Based Search**: `findFirst(condition)`, `findAll(condition)` backed by native `IUIAutomationCondition`.
+- [ ] **Extended Pattern Actions**: Full `TogglePattern`, `RangeValuePattern.setValue()`, `SelectionItemPattern.select()`.
+- [ ] **Window Pattern**: `close()`, `minimize()`, `maximize()` via `IUIAutomationWindowPattern`.
+- [ ] **Caching Mode**: Optional element caching via `IUIAutomationCacheRequest` for bulk property reads.
+
+---
+
+## v0.5.0: Ecosystem Integration
+
+- [ ] **FastOverlay Bridge**: Direct `getBoundingRect()` to `FastOverlay` bounding-box rendering in one call for live UI inspection.
+- [ ] **FastRobot Bridge**: Shortcut methods to click center-of-bounding-rect via `FastRobot.mouseMove + click`.
+- [ ] **FastAgent Tool Executor**: Expose UIA actions as structured tool calls for LLM-driven agentic desktop automation.
+
+---
+
+## v1.0.0: Production Hardening
+
+- [ ] **Cross-Platform**: AT-SPI2 (Linux) and `AXUIElement` (macOS) backend implementations.
+- [ ] **Full Stability Audit**: Long-run stress testing under concurrent element access.
+- [ ] **Extended ControlType Coverage**: Full mapping of all 50+ Windows UIA ControlType constants.
+
+---
+
+**Focus**: Performance is the USP. We optimize where Java stops.
